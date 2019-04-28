@@ -1,14 +1,10 @@
 ﻿using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNetCore.Mvc;
 using OdataRestApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace OdataRestApi.Configuration
 {
-    public class TodoItemModelConfiguration : IModelConfiguration
+    public class ChildItemModelConfiguration : IModelConfiguration
     {
         /// <summary>
         /// Applies model configurations using the provided builder for the specified API version.
@@ -17,9 +13,8 @@ namespace OdataRestApi.Configuration
         /// <param name="apiVersion">The <see cref="ApiVersion">API version</see> associated with the <paramref name="builder"/>.</param>
         public void Apply(ODataModelBuilder builder, ApiVersion apiVersion)
         {
-            var order = builder.EntitySet<TodoItem>("TodoItem")
-                .EntityType.HasKey(o => o.Id)
-                .HasMany(x => x.ChildItems);
+            var order = builder.EntitySet<ChildItem>("ChildItem")
+                .EntityType.HasKey(o => o.Id);
         }
     }
 }

@@ -14,5 +14,6 @@ namespace OdataRestApi.Models
         }
 
         public DbSet<TodoItem> TodoItems { get; set; }
+        public DbSet<ChildItem> ChildItems { get; set; }
     }
 }

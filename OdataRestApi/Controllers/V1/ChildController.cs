@@ -13,41 +13,41 @@ using static Microsoft.AspNet.OData.Query.AllowedQueryOptions;
 namespace OdataRestApi.Controllers.V1
 {
     [ApiVersion("1.0")]
-    [ODataRoutePrefix("TodoItem")]
-    public class TodoController : ODataController
+    [ODataRoutePrefix("ChildItem")]
+    public class ChildController : ODataController
     {
         private readonly TodoContext _context;
 
-        public TodoController(TodoContext context)
+        public ChildController(TodoContext context)
         {
             _context = context;
         }
 
         [ODataRoute]
-        [EnableQuery(MaxTop = 100, AllowedQueryOptions = Select | Top | Skip | Count | Expand)]
-        [ProducesResponseType(typeof(ODataValue<IEnumerable<TodoItem>>), Status200OK)]
-        public IActionResult GetTodoItems()
+        [EnableQuery(MaxTop = 100, AllowedQueryOptions = Select | Top | Skip | Count)]
+        [ProducesResponseType(typeof(ODataValue<IEnumerable<ChildItem>>), Status200OK)]
+        public IActionResult GetChildItems()
         {
-            return Ok(_context.TodoItems.AsQueryable());
+            return Ok(_context.ChildItems.AsQueryable());
         }
 
         [ODataRoute("({id})")]
         [EnableQuery(AllowedQueryOptions = Select | Count)]
-        [ProducesResponseType(typeof(TodoItem), Status200OK)]
+        [ProducesResponseType(typeof(ChildItem), Status200OK)]
         [ProducesResponseType(Status404NotFound)]
-        public SingleResult<TodoItem> GetTodoItem([FromODataUri] long id)
+        public SingleResult<ChildItem> GetChildItem([FromODataUri] int id)
         {
-            var result = _context.TodoItems.Where(x => x.Id == id);
+            var result = _context.ChildItems.Where(x => x.Id == id);
 
             return SingleResult.Create(result);
         }
 
         [ODataRoute]
-        [ProducesResponseType(typeof(TodoItem), Status201Created)]
+        [ProducesResponseType(typeof(ChildItem), Status201Created)]
         [ProducesResponseType(Status400BadRequest)]
-        public async Task<IActionResult> PostTodoItem([FromBody] TodoItem model)
+        public async Task<IActionResult> PostChildItem([FromBody] ChildItem model)
         {
-            _context.TodoItems.Add(model);
+            _context.ChildItems.Add(model);
             await _context.SaveChangesAsync();
 
             return Created(model);
@@ -56,7 +56,7 @@ namespace OdataRestApi.Controllers.V1
         [ODataRoute("({id})")]
         [ProducesResponseType(Status204NoContent)]
         [ProducesResponseType(Status400BadRequest)]
-        public async Task<IActionResult> PutTodoItem([FromODataUri] long id, [FromBody] TodoItem model)
+        public async Task<IActionResult> PutChildItem([FromODataUri] int id, [FromBody] ChildItem model)
         {
             if (id != model.Id)
             {
@@ -70,18 +70,18 @@ namespace OdataRestApi.Controllers.V1
         }
 
         [ODataRoute("({id})")]
-        [ProducesResponseType(typeof(TodoItem), Status200OK)]
+        [ProducesResponseType(typeof(ChildItem), Status200OK)]
         [ProducesResponseType(Status204NoContent)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<IActionResult> PatchTodoItem([FromODataUri] long id, Delta<TodoItem> delta)
+        public async Task<IActionResult> PatchChildItem([FromODataUri] int id, Delta<ChildItem> delta)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var model = await _context.TodoItems.FindAsync(id);
+            var model = await _context.ChildItems.FindAsync(id);
 
             delta.Patch(model);
 
@@ -91,16 +91,16 @@ namespace OdataRestApi.Controllers.V1
         [ODataRoute("({id})")]
         [ProducesResponseType(Status204NoContent)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<IActionResult> DeleteTodoItem([FromODataUri] long id)
+        public async Task<IActionResult> DeleteChildItem([FromODataUri] int id)
         {
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            var model = await _context.ChildItems.FindAsync(id);
 
-            if (todoItem == null)
+            if (model == null)
             {
                 return NotFound();
             }
 
-            _context.TodoItems.Remove(todoItem);
+            _context.ChildItems.Remove(model);
             await _context.SaveChangesAsync();
 
             return NoContent();

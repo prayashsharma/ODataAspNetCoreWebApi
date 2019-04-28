@@ -19,6 +19,6 @@ namespace OdataRestApi.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(string), Status200OK)]
         [ODataRoute("GetTodoCreatorName(Id={id})")]
-        public IActionResult GetSalesTaxRate(int id) => Ok("Prayash");
+        public IActionResult GetTodoCreatorName(int id) => Ok("Prayash");
     }
 }

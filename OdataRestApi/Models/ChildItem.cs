@@ -9,7 +9,6 @@ namespace OdataRestApi.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-
         public long TodoItemId { get; set; }
     }
 }

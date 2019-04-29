@@ -24,7 +24,8 @@ namespace OdataRestApi.Controllers.V1
         }
 
         [ODataRoute]
-        [EnableQuery(MaxTop = 100, AllowedQueryOptions = Select | Top | Skip | Count)]
+        //[EnableQuery(MaxTop = 100, AllowedQueryOptions = Select | Top | Skip | Count)]
+        [EnableQuery(AllowedQueryOptions = Select)]
         [ProducesResponseType(typeof(ODataValue<IEnumerable<ChildItem>>), Status200OK)]
         public IActionResult GetChildItems()
         {
@@ -32,7 +33,7 @@ namespace OdataRestApi.Controllers.V1
         }
 
         [ODataRoute("({id})")]
-        [EnableQuery(AllowedQueryOptions = Select | Count)]
+        [EnableQuery(AllowedQueryOptions = Select)]
         [ProducesResponseType(typeof(ChildItem), Status200OK)]
         [ProducesResponseType(Status404NotFound)]
         public SingleResult<ChildItem> GetChildItem([FromODataUri] int id)

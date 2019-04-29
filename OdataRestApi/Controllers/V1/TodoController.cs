@@ -38,7 +38,6 @@ namespace OdataRestApi.Controllers.V1
         public SingleResult<TodoItem> GetTodoItem([FromODataUri] long id)
         {
             var result = _context.TodoItems.Where(x => x.Id == id);
-
             return SingleResult.Create(result);
         }
 
@@ -49,7 +48,6 @@ namespace OdataRestApi.Controllers.V1
         {
             _context.TodoItems.Add(model);
             await _context.SaveChangesAsync();
-
             return Created(model);
         }
 

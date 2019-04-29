@@ -22,6 +22,8 @@ using static Microsoft.AspNet.OData.Query.AllowedQueryOptions;
 
 //using OdataRestApi.Configuration;
 using OdataRestApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using OdataRestApi.Configuration;
 
 namespace OdataRestApi
 {
@@ -59,6 +61,17 @@ namespace OdataRestApi
                     // can also be used to control the format of the API version in route templates
                     options.SubstituteApiVersionInUrl = true;
                 });
+
+            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerOptions>();
+            services.AddSwaggerGen(
+                options =>
+                {
+                    // add a custom operation filter which sets default values
+                    options.OperationFilter<SwaggerDefaultValues>();
+
+                    // integrate xml comments
+                    //options.IncludeXmlComments(XmlCommentsFilePath);
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -81,6 +94,18 @@ namespace OdataRestApi
                 builder.MapVersionedODataRoutes("ODataRoutesByPath", "api/v{version:apiVersion}", modelBuilder.GetEdmModels());
                 builder.EnableDependencyInjection();
             });
+
+            app.UseSwagger();
+            app.UseSwaggerUI(
+                options =>
+                {
+                    // build a swagger endpoint for each discovered API version
+                    foreach (var description in provider.ApiVersionDescriptions)
+                    {
+                        options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+                    }
+                    options.RoutePrefix = string.Empty;
+                });
         }
     }
 }

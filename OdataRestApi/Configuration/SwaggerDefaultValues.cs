@@ -59,7 +59,7 @@ namespace OdataRestApi.Configuration
             var parametersToRemove = operation.Parameters.Where(x => x.Name.StartsWith('$'));
             operation.Parameters = operation.Parameters.Where(s => !parametersToRemove.Any(p => p.Name == s.Name)).ToList();
 
-            //Get Enable Query attribute for controller action
+            //Get EnableQuery attribute for controller action
             var queryAttribute = context.MethodInfo.GetCustomAttributes(true)
                                         .Union(context.MethodInfo.DeclaringType.GetCustomAttributes(true))
                                         .OfType<EnableQueryAttribute>().FirstOrDefault();

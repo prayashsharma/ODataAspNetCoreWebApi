@@ -24,8 +24,7 @@ namespace OdataRestApi.Controllers.V1
         }
 
         [ODataRoute]
-        //[EnableQuery(MaxTop = 100, AllowedQueryOptions = Select | Top | Skip | Count)]
-        [EnableQuery(AllowedQueryOptions = Select)]
+        [EnableQuery(MaxTop = 100, AllowedQueryOptions = Select | Top | Skip | Count)]
         [ProducesResponseType(typeof(ODataValue<IEnumerable<ChildItem>>), Status200OK)]
         public IActionResult GetChildItems()
         {
@@ -85,7 +84,7 @@ namespace OdataRestApi.Controllers.V1
             var model = await _context.ChildItems.FindAsync(id);
 
             delta.Patch(model);
-
+            await _context.SaveChangesAsync();
             return Updated(model);
         }
 

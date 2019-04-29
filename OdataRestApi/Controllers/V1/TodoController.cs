@@ -24,7 +24,7 @@ namespace OdataRestApi.Controllers.V1
         }
 
         [ODataRoute]
-        [EnableQuery(MaxTop = 100, AllowedQueryOptions = Select | Top | Skip | Count | Expand)]
+        [EnableQuery(MaxTop = 100, AllowedQueryOptions = Select | Top | Skip | Count | Expand | OrderBy)]
         [ProducesResponseType(typeof(ODataValue<IEnumerable<TodoItem>>), Status200OK)]
         public IActionResult GetTodoItems()
         {
@@ -72,7 +72,7 @@ namespace OdataRestApi.Controllers.V1
         [ProducesResponseType(Status204NoContent)]
         [ProducesResponseType(Status400BadRequest)]
         [ProducesResponseType(Status404NotFound)]
-        public async Task<IActionResult> PatchTodoItem([FromODataUri] long id, Delta<TodoItem> delta)
+        public async Task<IActionResult> PatchTodoItem([FromODataUri] long id, Delta<TodoItem> entity)
         {
             if (!ModelState.IsValid)
             {
@@ -81,8 +81,8 @@ namespace OdataRestApi.Controllers.V1
 
             var model = await _context.TodoItems.FindAsync(id);
 
-            delta.Patch(model);
-
+            entity.Patch(model);
+            await _context.SaveChangesAsync();
             return Updated(model);
         }
 
@@ -91,14 +91,14 @@ namespace OdataRestApi.Controllers.V1
         [ProducesResponseType(Status404NotFound)]
         public async Task<IActionResult> DeleteTodoItem([FromODataUri] long id)
         {
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            var model = await _context.TodoItems.FindAsync(id);
 
-            if (todoItem == null)
+            if (model == null)
             {
                 return NotFound();
             }
 
-            _context.TodoItems.Remove(todoItem);
+            _context.TodoItems.Remove(model);
             await _context.SaveChangesAsync();
 
             return NoContent();

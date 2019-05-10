@@ -10,9 +10,9 @@ using OdataRestApi.Models;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using static Microsoft.AspNet.OData.Query.AllowedQueryOptions;
 
-namespace OdataRestApi.Controllers.V1
+namespace OdataRestApi.Controllers.V2
 {
-    [ApiVersion("1.0")]
+    [ApiVersion("2.0")]
     [ODataRoutePrefix("ChildItem")]
     [EnableQuery]
     public class ChildController : ODataController
@@ -25,7 +25,7 @@ namespace OdataRestApi.Controllers.V1
         }
 
         [ODataRoute]
-        [EnableQuery(MaxTop = 100, AllowedQueryOptions = Select | Top | Skip | Count)]
+        [EnableQuery(AllowedQueryOptions = All)]
         [ProducesResponseType(typeof(ODataValue<IEnumerable<ChildItem>>), Status200OK)]
         public IActionResult GetChildItems()
         {
@@ -33,13 +33,12 @@ namespace OdataRestApi.Controllers.V1
         }
 
         [ODataRoute("({id})")]
-        [EnableQuery(AllowedQueryOptions = Select)]
+        [EnableQuery(AllowedQueryOptions = Select | Count)]
         [ProducesResponseType(typeof(ChildItem), Status200OK)]
         [ProducesResponseType(Status404NotFound)]
         public SingleResult<ChildItem> GetChildItem([FromODataUri] int id)
         {
             var result = _context.ChildItems.Where(x => x.Id == id);
-
             return SingleResult.Create(result);
         }
 

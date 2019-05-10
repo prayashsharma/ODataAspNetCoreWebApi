@@ -2,35 +2,36 @@
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.Versioning;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Collections;
 using System.Linq;
 
 namespace OdataRestApi.Configuration
 {
     public class SwaggerDefaultValues : IOperationFilter
     {
-        public ApiVersionMapping Explicit { get; private set; }
-        public ApiVersionMapping Implicit { get; private set; }
-
         public void Apply(Operation operation, OperationFilterContext context)
         {
-            // CurrentIssue: Swagger does not display the correct query parameters listed under EnableQueryAttribute in controller
-            // this method fixes this issue temporarily
-            UpdateOperationParameters(operation, context);
+            //Get EnableQuery attributes for controller action
+            var queryAttribute = context.MethodInfo.GetCustomAttributes(true)
+                                        .Union(context.MethodInfo.DeclaringType.GetCustomAttributes(true))
+                                        .OfType<EnableQueryAttribute>().FirstOrDefault();
+
+            // CurrentIssue:
+            // Swagger does not display the correct query parameters listed under EnableQueryAttribute in controller
+            // So when EnableQuery Attribute is empty in action controller, it assigns "Supported" queries. If this is the case then do not perform the the method below.
+            // For other allowed query options, perform the method below to remove and reassign the query parameters so it displays correctly in swagger ui
+            if (queryAttribute != null && !queryAttribute.AllowedQueryOptions.HasFlag(AllowedQueryOptions.Supported))
+                UpdateOperationParameters(operation, context, queryAttribute);
 
             var apiDescription = context.ApiDescription;
             var apiVersion = apiDescription.GetApiVersion();
-            var model = apiDescription.ActionDescriptor?.GetApiVersionModel(Explicit | Implicit);
+            var model = apiDescription.ActionDescriptor?.GetApiVersionModel();
 
             operation.Deprecated = model.DeprecatedApiVersions.Contains(apiVersion);
 
             if (operation.Parameters == null)
-            {
                 return;
-            }
 
             //// REF: https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/412
             //// REF: https://github.com/domaindrivendev/Swashbuckle.AspNetCore/pull/413
@@ -53,19 +54,14 @@ namespace OdataRestApi.Configuration
             }
         }
 
-        private void UpdateOperationParameters(Operation operation, OperationFilterContext context)
+        private void UpdateOperationParameters(Operation operation, OperationFilterContext context, EnableQueryAttribute queryAttribute)
         {
-            //Clear parameters list where name starts with '$'
-            var parametersToRemove = operation.Parameters.Where(x => x.Name.StartsWith('$'));
-            operation.Parameters = operation.Parameters.Where(s => !parametersToRemove.Any(p => p.Name == s.Name)).ToList();
-
-            //Get EnableQuery attribute for controller action
-            var queryAttribute = context.MethodInfo.GetCustomAttributes(true)
-                                        .Union(context.MethodInfo.DeclaringType.GetCustomAttributes(true))
-                                        .OfType<EnableQueryAttribute>().FirstOrDefault();
-
             if (queryAttribute != null)
             {
+                //Clear parameters list where name starts with '$'
+                var parametersToRemove = operation.Parameters.Where(x => x.Name.StartsWith('$'));
+                operation.Parameters = operation.Parameters.Where(s => !parametersToRemove.Any(p => p.Name == s.Name)).ToList();
+
                 if (queryAttribute.AllowedQueryOptions.HasFlag(AllowedQueryOptions.Select))
                 {
                     operation.Parameters.Add(new NonBodyParameter

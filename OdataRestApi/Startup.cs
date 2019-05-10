@@ -1,29 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNet.OData.Builder;
+﻿using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.OData.Edm;
-using Newtonsoft.Json.Serialization;
-using OdataRestApi.Controllers;
-using static Microsoft.AspNet.OData.Query.AllowedQueryOptions;
-
-//using OdataRestApi.Configuration;
+using OdataRestApi.Configuration;
 using OdataRestApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using OdataRestApi.Configuration;
+using System.Linq;
+using static Microsoft.AspNet.OData.Query.AllowedQueryOptions;
 
 namespace OdataRestApi
 {
@@ -48,7 +38,15 @@ namespace OdataRestApi
                     //     - json input only pascal case working
                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            services.AddApiVersioning(options => options.ReportApiVersions = true);
+            services.AddApiVersioning(options =>
+            {
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.ReportApiVersions = true;
+                // will be used WHEN VERSIONING BY: header
+                options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
+            });
+
             services.AddOData().EnableApiVersioning();
             services.AddODataApiExplorer(
                 options =>
@@ -91,7 +89,12 @@ namespace OdataRestApi
             app.UseMvc(builder =>
             {
                 builder.Expand().Select().Count().OrderBy().Filter().MaxTop(100);
-                builder.MapVersionedODataRoutes("ODataRoutesByPath", "api/v{version:apiVersion}", modelBuilder.GetEdmModels());
+                // WHEN VERSIONING BY: url segment
+                // builder.MapVersionedODataRoutes("ODataRoutesByPathSegment", "api/v{version:apiVersion}", modelBuilder.GetEdmModels());
+
+                // WHEN VERSIONING BY: query string or http header
+                builder.MapVersionedODataRoutes("ODataRoutesByRequestHeaderOrQueryString", "api", modelBuilder.GetEdmModels());
+
                 builder.EnableDependencyInjection();
             });
 

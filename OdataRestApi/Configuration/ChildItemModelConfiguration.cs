@@ -13,7 +13,7 @@ namespace OdataRestApi.Configuration
         /// <param name="apiVersion">The <see cref="ApiVersion">API version</see> associated with the <paramref name="builder"/>.</param>
         public void Apply(ODataModelBuilder builder, ApiVersion apiVersion)
         {
-            var order = builder.EntitySet<ChildItem>("ChildItem")
+            builder.EntitySet<ChildItem>("ChildItem")
                 .EntityType.HasKey(o => o.Id);
         }
     }

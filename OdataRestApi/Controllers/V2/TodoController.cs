@@ -23,6 +23,7 @@ namespace OdataRestApi.Controllers.V2
             _context = context;
         }
 
+        [HttpGet]
         [ODataRoute]
         [EnableQuery(MaxTop = 100, AllowedQueryOptions = Select | Top | Skip | Count | Expand | OrderBy)]
         [ProducesResponseType(typeof(ODataValue<IEnumerable<TodoItem>>), Status200OK)]
@@ -31,6 +32,7 @@ namespace OdataRestApi.Controllers.V2
             return Ok(_context.TodoItems.AsQueryable());
         }
 
+        [HttpGet]
         [ODataRoute("({id})")]
         [EnableQuery(AllowedQueryOptions = All)]
         [ProducesResponseType(typeof(TodoItem), Status200OK)]
@@ -41,6 +43,7 @@ namespace OdataRestApi.Controllers.V2
             return SingleResult.Create(result);
         }
 
+        [HttpPost]
         [ODataRoute]
         [ProducesResponseType(typeof(TodoItem), Status201Created)]
         [ProducesResponseType(Status400BadRequest)]
@@ -51,6 +54,7 @@ namespace OdataRestApi.Controllers.V2
             return Created(model);
         }
 
+        [HttpPut]
         [ODataRoute("({id})")]
         [ProducesResponseType(Status204NoContent)]
         [ProducesResponseType(Status400BadRequest)]
@@ -67,6 +71,7 @@ namespace OdataRestApi.Controllers.V2
             return NoContent();
         }
 
+        [HttpPatch]
         [ODataRoute("({id})")]
         [ProducesResponseType(typeof(TodoItem), Status200OK)]
         [ProducesResponseType(Status204NoContent)]
@@ -86,6 +91,7 @@ namespace OdataRestApi.Controllers.V2
             return Updated(model);
         }
 
+        [HttpDelete]
         [ODataRoute("({id})")]
         [ProducesResponseType(Status204NoContent)]
         [ProducesResponseType(Status404NotFound)]
@@ -102,6 +108,15 @@ namespace OdataRestApi.Controllers.V2
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpGet]
+        [ODataRoute(nameof(ApiVersion))]
+        [ProducesResponseType(typeof(string), Status200OK)]
+        public IActionResult ApiVersion()
+        {
+            var apiVersion = HttpContext.GetRequestedApiVersion();
+            return Ok($"v{apiVersion.MajorVersion}.{apiVersion.MinorVersion}");
         }
     }
 }

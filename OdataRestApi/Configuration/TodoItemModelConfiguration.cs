@@ -17,9 +17,16 @@ namespace OdataRestApi.Configuration
         /// <param name="apiVersion">The <see cref="ApiVersion">API version</see> associated with the <paramref name="builder"/>.</param>
         public void Apply(ODataModelBuilder builder, ApiVersion apiVersion)
         {
-            var order = builder.EntitySet<TodoItem>("TodoItem")
-                .EntityType.HasKey(o => o.Id)
-                .HasMany(x => x.ChildItems);
+            var todo = builder.EntitySet<TodoItem>("TodoItem")
+                .EntityType.HasKey(o => o.Id);
+
+            if (apiVersion == ApiVersions.V1)
+            {
+                todo.Collection.Function("FirstTodo").ReturnsFromEntitySet<TodoItem>("TodoItem");
+                todo.Collection.Function("ReturnSomeString").Returns<string>();
+            }
+
+            todo.Collection.Function("ApiVersion").Returns<string>();
         }
     }
 }

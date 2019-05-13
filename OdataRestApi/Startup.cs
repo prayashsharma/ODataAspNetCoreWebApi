@@ -89,11 +89,17 @@ namespace OdataRestApi
             app.UseMvc(builder =>
             {
                 builder.Expand().Select().Count().OrderBy().Filter().MaxTop(100);
-                // WHEN VERSIONING BY: url segment
-                // builder.MapVersionedODataRoutes("ODataRoutesByPathSegment", "api/v{version:apiVersion}", modelBuilder.GetEdmModels());
 
-                // WHEN VERSIONING BY: query string or http header
-                builder.MapVersionedODataRoutes("ODataRoutesByRequestHeaderOrQueryString", "api", modelBuilder.GetEdmModels());
+                if (Configuration["ApiVersioningStyle:UrlPathSegment"] == "true")
+                {
+                    // WHEN VERSIONING BY: url segment
+                    builder.MapVersionedODataRoutes("ODataRoutesByPathSegment", "api/v{version:apiVersion}", modelBuilder.GetEdmModels());
+                }
+                else
+                {
+                    // WHEN VERSIONING BY: query string or http header
+                    builder.MapVersionedODataRoutes("ODataRoutesByRequestHeaderOrQueryString", "api", modelBuilder.GetEdmModels());
+                }
 
                 builder.EnableDependencyInjection();
             });
